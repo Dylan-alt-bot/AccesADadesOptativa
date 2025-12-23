@@ -1,7 +1,5 @@
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
 
@@ -12,6 +10,11 @@ public class Main {
             PakMain = Main.class.getResource(FILE_PakMain).getFile(),
             BugPak = Main.class.getResource(FILE_BugPak).getFile();
 
+    @Override
+    public String toString() {
+        return super.toString();
+    }
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         sc.useLocale(Locale.ENGLISH);
@@ -19,20 +22,29 @@ public class Main {
         File mailMain = new File("emailMaintainer.txt");
 
         String[] packages = new String[0];
-        ArrayList<String> mainNames = new ArrayList<>();
-        ArrayList<String> mainEmails = new ArrayList<>();
+        HashSet<String> mainNames = new HashSet<>();
+        HashSet<String> mainEmails = new HashSet<>();
+
+        BufferedWriter bwMailMain;
+        try {
+            bwMailMain = new BufferedWriter(new FileWriter(mailMain));
+        } catch (IOException e) {
+            System.out.println("An error occurred when writing to emailMaintainer.txt.");
+            throw new RuntimeException(e);
+        }
 
         try {
 
             BufferedReader brBugPak = new BufferedReader(new FileReader(BugPak));
-            BufferedWriter bwMailMain = new BufferedWriter(new FileWriter(mailMain));
 
+            brBugPak.readLine();
             String regBugPak = brBugPak.readLine();
-            regBugPak = brBugPak.readLine();
 
             System.out.println("Please input the target bug ID to generate an email to send to the corresponding package maintainers: ");
 
             int bugID = sc.nextInt();
+
+            //Searching BugID match in rcBugPackage
 
             while (regBugPak != null) {
 
@@ -48,6 +60,7 @@ public class Main {
 
             }
 
+            //Searching for packaging matches in PackageMaintainer
 
             for (int i = 1; i < packages.length; i++) {
 
@@ -62,6 +75,8 @@ public class Main {
                             mainNames.add(regPakMain.split(";")[1]);
                             mainEmails.add(regPakMain.split(";")[2]);
 
+                            //test with 670292 for triplicate maintainer/emails
+
                             break;
 
                         }
@@ -75,34 +90,69 @@ public class Main {
             //EMAIL OUTPUT
 
             System.out.println("Email generated successfully!");
-            System.out.print("To: ");
 
-            for (int i = 0; i < mainEmails.size(); i++) {
-                System.out.print(mainEmails.get(i) + ", ");
+            bwMailMain.write("To: ");
+
+            for (int i = 1; i <= mainEmails.size(); i++) {
+
+                    bwMailMain.write(String.join(", ", mainEmails));
+
+                    if (mainEmails.size() == 1) {
+                        break;
+                    }
+
             }
 
-            System.out.println("");
+            bwMailMain.newLine();
+            bwMailMain.newLine();
 
-            System.out.print("Dear ");
+            bwMailMain.write("Dear ");
 
-            for (int i = 0; i < mainNames.size(); i++) {
-                System.out.print(mainNames.get(i) + ", ");
+            for (int i = 1; i <= mainNames.size(); i++) {
+                bwMailMain.write(String.join(", ", mainNames));
+                if (mainNames.size() == 1) {
+                    break;
+                }
             }
 
-            System.out.println(" ");
+            bwMailMain.newLine();
+            bwMailMain.newLine();
 
-            System.out.print("You have a new bug: ");
+            bwMailMain.write("You have a new bug: ");
 
             for (int i = 1; i < packages.length; i++) {
-                System.out.print(packages[i] + ", ");
+
+                bwMailMain.write(packages[i]);
+
+                if (packages.length > 1 && packages.length - 1 != i) {
+
+                    bwMailMain.write(", ");
+
+                }
+
             }
 
-            System.out.println("- RC bug number #" + bugID);
-            System.out.println("Please, fix it as soon as possible.");
-            System.out.println("Cheers.");
+            bwMailMain.write(" - RC bug number #" + bugID);
+
+            bwMailMain.newLine();
+
+            bwMailMain.write("Please, fix it as soon as possible.");
+
+            bwMailMain.newLine();
+            bwMailMain.newLine();
+
+            bwMailMain.write("Cheers.");
+
+            bwMailMain.close();
 
         } catch (Exception e) {
-            System.out.println("ERROR: " + e.getMessage());
+            System.out.println("Something went wrong during email generation. Please consult the error message in emailMaintainer.txt for more details.");
+            try {
+                bwMailMain.write("ERROR: " + e.getMessage());
+                bwMailMain.close();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 }

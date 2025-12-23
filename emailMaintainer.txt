@@ -1,0 +1,8 @@
+To: ohura@debian.org
+
+Dear OHURA Makoto
+
+You have a new bug: xemacs21-gnome-mule, xemacs21-gnome-nomule, xemacs21-gnome-mule-canna-wnn - RC bug number #670292
+Please, fix it as soon as possible.
+
+Cheers.
