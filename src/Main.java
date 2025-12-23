@@ -24,18 +24,16 @@ public class Main {
 
         try {
 
-            BufferedReader brPakMain = new BufferedReader(new FileReader(PakMain));
             BufferedReader brBugPak = new BufferedReader(new FileReader(BugPak));
             BufferedWriter bwMailMain = new BufferedWriter(new FileWriter(mailMain));
 
-            String regPakMain = brPakMain.readLine();
             String regBugPak = brBugPak.readLine();
 
             System.out.println("Please input the target bug ID to generate an email to send to the corresponding package maintainers: ");
 
             int bugID = sc.nextInt();
 
-            while (regPakMain != null && regBugPak != null) {
+            while (regBugPak != null) {
 
                 if (bugID == Integer.parseInt(regBugPak.split(";")[0])) {
 
@@ -43,24 +41,51 @@ public class Main {
 
                 }
 
-                    String PakMainFind = regPakMain.split(";")[0];
-
-                for (int i = 1; i < packages.length; i++) {
-
-                    if (packages[i].equals(PakMainFind)) {
-
-                        for (int k = 1; k < packages.length; k++) {
-
-
-                        }
-                    }
-                }
-
-
-
-
+                regBugPak = brBugPak.readLine();
 
             }
+
+
+            for (int i = 1; i < packages.length; i++) {
+
+                try (BufferedReader brPakMain = new BufferedReader(new FileReader(PakMain))) {
+
+                    String regPakMain = brPakMain.readLine();
+
+                    while (regPakMain != null) {
+
+                        if (packages[i].equals(regPakMain.split(";")[0])) {
+
+                            mainNames.add(regPakMain.split(";")[1]);
+                            mainEmails.add(regPakMain.split(";")[2]);
+
+                            break;
+
+                        }
+
+                        regPakMain = brPakMain.readLine();
+
+                    }
+                }
+            }
+
+            //EMAIL OUTPUT
+
+            System.out.print("Email generated successfully: " +
+                    "" +
+                    "From: owner@bugs.debain.org" +
+                    "To: ");
+
+            for (int i = 0; i < mainEmails.size(); i++) {
+                System.out.print(mainEmails.get(i));
+            }
+
+
+
+
+
+
+
 
         } catch (Exception e) {
             System.out.println("ERROR: " + e.getMessage());
